@@ -81,11 +81,16 @@ module VagrantPlugins
           # Create editor instance for removing invalid IDs
           editor = Vagrant::Util::StringBlockEditor.new(nfs_exports_content)
 
+          # Filter out exports from other users
+          user_ids = editor.keys.select do |key|
+            key.start_with?("#{user} ")
+          end
+
           # Build composite IDs with UID information and discover invalid entries
           composite_ids = valid_ids.map do |v_id|
             "#{user} #{v_id}"
           end
-          remove_ids = editor.keys - composite_ids
+          remove_ids = user_ids - composite_ids
 
           logger.debug("Known valid NFS export IDs: #{valid_ids}")
           logger.debug("Composite valid NFS export IDs with user: #{composite_ids}")
